@@ -481,10 +481,18 @@ void CHelperNeo::auto_select()
 	{
 		auto file = new QFile(Jumple + Jumple_Process_Name);
 		if (file->exists())
-			jp_dectl();
-		file = new QFile(Jumple + Jumple_Changed_Name);
-		if (file->exists())
-			jp_rectl();
+        {
+            if(jp_patch())
+            {
+                QMessageBox::information(this, "提示", "QAQ，安装补丁失败了...尝试解除控制。");
+                jp_dectl();
+            }
+        }
+        else
+        {
+            file = new QFile(Jumple + Jumple_Changed_Name);
+            if (file->exists())jp_rectl();
+        }
 	}
 }
 
@@ -665,7 +673,8 @@ void CHelperNeo::patch_sethc()
         p->waitForStarted();
         if(p->waitForFinished())
         {
-            //QMessageBox::information(this,"",QString::fromLocal8Bit(p->readAllStandardError()));
+            QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardError()));
+            QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardOutput()));
             auto file=new QFile("C:\\Windows\\System32\\sethc.exe");
             if(file->rename("C:\\Windows\\System32\\sethc.exe.bak"))
             {
