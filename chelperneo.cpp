@@ -673,15 +673,17 @@ void CHelperNeo::patch_sethc()
         p->waitForStarted();
         if(p->waitForFinished())
         {
-            QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardError()));
-            QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardOutput()));
-            auto file=new QFile("C:\\Windows\\System32\\sethc.exe");
-            if(file->rename("C:\\Windows\\System32\\sethc.exe.bak"))
+            if(QFile("debug.o").exists()){
+                QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardError()));
+                QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardOutput()));
+            }
+            auto file=new QFile("C:\\Windows\\Native\\sethc.exe");
+            if(file->rename("C:\\Windows\\Native\\sethc.exe.bak"))
             {
                 file=new QFile("chelper_sethc.exe");
                 if(file->exists())
                 {
-                    if(file->copy("C:\\Windows\\System32\\sethc.exe"))
+                    if(file->copy("C:\\Windows\\Native\\sethc.exe"))
                     {
                         ui.label_patch->setText("补丁状态：已安装");
                         ui.pushButton_patch->setText("删除增强补丁");
@@ -697,15 +699,15 @@ void CHelperNeo::patch_sethc()
     }
     else
     {
-        auto file=new QFile("C:\\Windows\\System32\\sethc.exe");
+        auto file=new QFile("C:\\Windows\\Native\\sethc.exe");
         if(file->exists())
         {
            if(file->remove())
            {
-               file=new QFile("C:\\Windows\\System32\\sethc.exe.bak");
+               file=new QFile("C:\\Windows\\Native\\sethc.exe.bak");
                if(file->exists())
                {
-                   if(file->rename("C:\\Windows\\System32\\sethc.exe"))
+                   if(file->rename("C:\\Windows\\Native\\sethc.exe"))
                    {
                        ui.pushButton_patch->setText("安装增强补丁");
                        ui.label_patch->setText("补丁状态：未安装");
