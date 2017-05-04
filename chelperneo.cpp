@@ -106,6 +106,7 @@ CHelperNeo::CHelperNeo(QWidget *parent)
         ui.pushButton_jp->setEnabled(false);
         ui.action_jp_dectl->setEnabled(false);
         ui.action_jp_rectl->setEnabled(false);
+        ui.action_jp_patch->setEnabled(false);
         ui.label_stat->setText(ui.label_stat->text() + "江波ECR：未安装");
 	}
 	else
@@ -669,29 +670,33 @@ void CHelperNeo::patch_sethc()
     if(ui.label_patch->text().indexOf("已")==-1)
     {
         auto p= new QProcess();
-        p->start("takeown",QStringList()<<"/f"<<"C:\\Windows\\System32\\sethc.exe");
+        p->start("Takeown",QStringList()<<"/f"<<"C:\\Windows\\System32\\sethc.exe");
         p->waitForStarted();
         if(p->waitForFinished())
         {
-            if(QFile("debug.o").exists()){
+            if(QFile("debug.o").exists())
+            {
                 QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardError()));
                 QMessageBox::information(this,"测试输出",QString::fromLocal8Bit(p->readAllStandardOutput()));
             }
-            auto file=new QFile("C:\\Windows\\Native\\sethc.exe");
-            if(file->rename("C:\\Windows\\Native\\sethc.exe.bak"))
+            auto file=new QFile("C:\\Windows\\SysNative\\sethc.exe");
+            p = new QProcess();
+            p->start("setPermission.exe");
+            p->waitForStarted();
+            if(p->waitForFinished() && file->rename("C:\\Windows\\SysNative\\sethc.exe.bak"))
             {
                 file=new QFile("chelper_sethc.exe");
                 if(file->exists())
                 {
-                    if(file->copy("C:\\Windows\\Native\\sethc.exe"))
+                    if(file->copy("C:\\Windows\\SysNative\\sethc.exe"))
                     {
                         ui.label_patch->setText("补丁状态：已安装");
                         ui.pushButton_patch->setText("删除增强补丁");
                         return;
                     }
-                    else { error_str="复制补丁失败！";  goto error; }
+                    else { error_str="安装补丁失败！";  goto error; }
                 }
-                else { error_str="待补丁文件不存在！";  goto error; }
+                else { error_str="补丁文件不存在！";  goto error; }
             }
             else { error_str="备份原文件出错！尝试以管理员身份运行！";  goto error; }
         }
@@ -699,15 +704,15 @@ void CHelperNeo::patch_sethc()
     }
     else
     {
-        auto file=new QFile("C:\\Windows\\Native\\sethc.exe");
+        auto file=new QFile("C:\\Windows\\SysNative\\sethc.exe");
         if(file->exists())
         {
            if(file->remove())
            {
-               file=new QFile("C:\\Windows\\Native\\sethc.exe.bak");
+               file=new QFile("C:\\Windows\\SysNative\\sethc.exe.bak");
                if(file->exists())
                {
-                   if(file->rename("C:\\Windows\\Native\\sethc.exe"))
+                   if(file->rename("C:\\Windows\\SysNative\\sethc.exe"))
                    {
                        ui.pushButton_patch->setText("安装增强补丁");
                        ui.label_patch->setText("补丁状态：未安装");
@@ -717,9 +722,9 @@ void CHelperNeo::patch_sethc()
                }
                else { error_str="备份文件不存在！";  goto error2; }
            }
-           else { error_str="删除补丁失败！";  goto error2; }
+           else { error_str="删除补丁失败！尝试以管理员身份运行！";  goto error2; }
         }
-        else { error_str="待补丁文件不存在！";  goto error2; }
+        else { error_str="已安装补丁不存在！";  goto error2; }
     }
     error:
         QMessageBox::critical(this,"错误","安装补丁失败，"+error_str);
